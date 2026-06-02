@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{#
+  edit_event.html
+
+  Form to edit a single event. Pre-filled with the event's current
+  values. On submit it goes back to the review screen.
+
+  The route passes in:
+    event       -- dict with id, title, day (string), start (HH:MM), end (HH:MM)
+    quadrant    -- the QUADRANTS entry for this event's priority
+    errors      -- list of human-readable error strings (may be empty)
+    submitted   -- True if this render is the result of a failed
+                   submission (we want to keep the user's typed values
+                   even though they didn't pass validation).
+#}
+
+{% block title %}Edit Event - Priority Planner{% endblock %}
+
+{% block content %}
+  <h2>Edit Event</h2>
+
+  {% if quadrant %}
+    <p>
+      <small>Priority: <strong>{{ quadrant.name }}</strong>
+      &mdash; {{ quadrant.subtitle }}</small>
+    </p>
+    <p>
+      <small>To change the priority, delete this event and re-enter
+      it in the right quadrant.</small>
+    </p>
+  {% endif %}
+
+  {% if errors %}
+    <div>
+      <p><strong>Please fix the following:</strong></p>
+      <ul>
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('edit_event', event_id=event.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <p>
+      <label>
+        Title:
+        <input type="text" name="title" value="{{ event.title }}">
+      </label>
+    </p>
+
+    <p>
+      <label>
+        Day:
+        <select name="day">
+          {#
+            Build the dropdown with the event's current day pre-selected.
+            We compare against the event.day value (which is a string when
+            coming from a failed-submit or a day name when coming from a
+            fresh GET).
+          #}
+          {% for day_name in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"] %}
+            <option value="{{ day_name }}"
+              {% if event.day == day_name %}selected{% endif %}>
+              {{ day_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        Start time:
+        <input type="text" name="start" value="{{ event.start }}"
+               placeholder="e.g. 9:00AM or 09:00">
+      </label>
+    </p>
+
+    <p>
+      <label>
+        End time:
+        <input type="text" name="end" value="{{ event.end }}"
+               placeholder="e.g. 10:00AM or 10:00">
+      </label>
+    </p>
+
+    <p>
+      <button type="submit">Save changes</button>
+      <a href="{{ url_for('review') }}">Cancel</a>
+    </p>
+  </form>
+{% endblock %}

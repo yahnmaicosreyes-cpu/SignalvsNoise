@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{#
+  timesheet_empty.html
+
+  Shown when the user reaches /timesheet but has no events in their
+  session yet. We prefer a friendly message over either an empty
+  seven-day timesheet (wasteful) or an automatic redirect (pushy).
+#}
+
+{% block title %}No Events Yet - Priority Planner{% endblock %}
+
+{% block content %}
+  <h2>Nothing to show yet</h2>
+
+  <p>
+    You haven't entered any events yet, so there's no timesheet to
+    render. Want to start now?
+  </p>
+
+  <p>
+    <a href="{{ url_for('quadrant', quadrant_key='signal') }}">
+      <button type="button">Start with Signal events &rarr;</button>
+    </a>
+  </p>
+{% endblock %}

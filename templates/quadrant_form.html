@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{#
+  quadrant_form.html
+
+  The reusable event-entry form, used for ALL FOUR quadrants. The
+  route passes in:
+    quadrant_key  -- e.g. "signal" (used in the form's action URL)
+    quadrant      -- dict with name, subtitle, important, urgent, next
+    errors        -- list of per-row error strings (may be empty)
+    saved_count   -- how many events were saved on the last submit
+
+  The same template renders the Signal screen, the Urgent screen, etc.
+  Only the heading text and the submit target change. That's why we
+  build it once and reuse it -- Session 3 gets the other three
+  quadrants almost for free.
+#}
+
+{% block title %}{{ quadrant.name }} Events - Priority Planner{% endblock %}
+
+{% block content %}
+  {#
+    Progress indicator. Plain text "Step X of N" -- no visual styling
+    yet (that comes last). step_number comes from the quadrant data;
+    total_steps is passed by the route. Showing this means the user
+    always knows how far through the flow they are.
+  #}
+  <p>Step {{ quadrant.step_number }} of {{ total_steps }}</p>
+
+  <h2>{{ quadrant.name }} Events</h2>
+  <p><em>{{ quadrant.subtitle }}</em></p>
+
+  {#
+    Hint for empty quadrants. If the user has no events of this kind,
+    they don't need a special "skip" button -- they just submit with
+    nothing filled in and the flow advances.
+  #}
+  <p><small>No {{ quadrant.name|lower }} events? Just click "Save and continue."</small></p>
+
+  {#
+    If the previous submission had errors, show them. Jinja
+    auto-escapes the error text, so even if an error string somehow
+    contained HTML it couldn't inject anything.
+  #}
+  {% if errors %}
+    <div>
+      <p><strong>Some rows could not be saved:</strong></p>
+      <ul>
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% if saved_count > 0 %}
+        <p>({{ saved_count }} valid row(s) from this submission were saved.)</p>
+      {% endif %}
+      <p>Fix the rows above and submit again, or continue.</p>
+    </div>
+  {% endif %}
+
+  {#
+    The form POSTs back to the same quadrant URL. method="post" plus
+    the hidden CSRF token is what makes this a protected submission.
+  #}
+  <form method="post" action="{{ url_for('quadrant', quadrant_key=quadrant_key) }}">
+
+    {# CSRF token -- required for the POST to be accepted. #}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {#
+      The rows container. JavaScript adds more rows here when the
+      user clicks "Add another". We start with ONE row so there's
+      always something to fill in.
+
+      Each row uses the SAME field names (title, day, start, end)
+      repeated. Flask's getlist() reads them as parallel arrays.
+    #}
+    <div id="event-rows">
+      <div class="event-row">
+        <input type="text" name="title" placeholder="Event title">
+        <select name="day">
+          <option value="">-- day --</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+        <input type="text" name="start" placeholder="Start (e.g. 9:00AM)">
+        <input type="text" name="end" placeholder="End (e.g. 10:00AM)">
+      </div>
+    </div>
+
+    {#
+      The "Add another" button. type="button" (NOT submit) so it
+      doesn't submit the form -- it just triggers the JavaScript
+      that clones a row.
+    #}
+    <p>
+      <button type="button" id="add-row-btn">+ Add another event</button>
+    </p>
+
+    <p>
+      <button type="submit">
+        Save and continue
+        {% if quadrant.next %}&rarr;{% endif %}
+      </button>
+    </p>
+  </form>
+
+  <p>
+    <a href="{{ url_for('reset') }}">Start over</a>
+  </p>
+
+  {#
+    Load the JavaScript that powers the "Add another" button.
+    url_for('static', ...) builds the correct path to the file in
+    our static/ folder.
+  #}
+  <script src="{{ url_for('static', filename='add_row.js') }}"></script>
+{% endblock %}

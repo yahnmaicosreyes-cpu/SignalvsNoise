@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{#
+  timesheet_error.html
+
+  Shown when something goes wrong reconstructing the timesheet from
+  the user's session (e.g. corrupted session data). This shouldn't
+  happen in normal use -- it's a safety net.
+
+  We show the error message rather than a generic 500 page so the
+  user knows what to do (start over usually fixes it).
+#}
+
+{% block title %}Something Went Wrong - Priority Planner{% endblock %}
+
+{% block content %}
+  <h2>Something went wrong</h2>
+
+  <p>
+    We couldn't render your timesheet. The likely cause is corrupted
+    session data. Starting over usually fixes this.
+  </p>
+
+  <p>
+    <small>Error detail: {{ error_message }}</small>
+  </p>
+
+  <p>
+    <a href="{{ url_for('reset') }}">
+      <button type="button">Start over</button>
+    </a>
+  </p>
+{% endblock %}

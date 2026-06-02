@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{#
+  timesheet.html
+
+  The final timesheet display. Shows the engine's rendered output
+  in a <pre> block so whitespace, alignment, and ASCII banners are
+  preserved exactly as the engine emits them.
+
+  The route passes in:
+    rendered_timesheet -- the full string from engine's render_timesheet()
+    event_count        -- total events for the summary line
+    issue_count        -- total issues found (for the summary line)
+#}
+
+{% block title %}Your Week - Priority Planner{% endblock %}
+
+{% block content %}
+  <h2>Your Weekly Timesheet</h2>
+
+  <p>
+    <strong>{{ event_count }}</strong> event(s),
+    <strong>{{ issue_count }}</strong> scheduling issue(s) flagged.
+  </p>
+
+  <p>
+    <a href="{{ url_for('download_timesheet') }}">
+      <button type="button">Download as .txt</button>
+    </a>
+    <a href="{{ url_for('review') }}">Back to review</a>
+    <a href="{{ url_for('reset') }}">Start over</a>
+  </p>
+
+  {#
+    <pre> preserves whitespace and uses a monospace font, so the
+    engine's column alignment and banner lines render correctly.
+
+    Jinja auto-escapes rendered_timesheet by default, so even though
+    the engine output is safe, we get defense-in-depth XSS protection
+    -- if a user ever sneaks HTML into an event title and bypasses
+    the engine's title cap, the page still can't be hijacked.
+  #}
+  <pre>{{ rendered_timesheet }}</pre>
+
+  <p>
+    <a href="{{ url_for('download_timesheet') }}">
+      <button type="button">Download as .txt</button>
+    </a>
+  </p>
+{% endblock %}

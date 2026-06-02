@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{#
+  index.html
+
+  The landing page. Explains the flow briefly and offers a button
+  to begin entering events, starting with the Signal quadrant.
+#}
+
+{% block title %}Welcome - Priority Planner{% endblock %}
+
+{% block content %}
+  <h2>Plan Your Week</h2>
+
+  <p>
+    This planner helps you separate <strong>signal</strong> (important
+    things that prevent crisis) from <strong>noise</strong> (things that
+    feel urgent but aren't).
+  </p>
+
+  <p>
+    You'll enter your events in four groups, starting with the most
+    important. For each group, add as many events as you like.
+  </p>
+
+  <ol>
+    <li><strong>Signal</strong> &mdash; important, not urgent (your foundation)</li>
+    <li><strong>Urgent</strong> &mdash; important and urgent (today's fires)</li>
+    <li><strong>Interruption</strong> &mdash; urgent but not important</li>
+    <li><strong>Noise</strong> &mdash; neither (drop candidates)</li>
+  </ol>
+
+  {#
+    The Start button is just a link to the first quadrant. We use a
+    link (GET) rather than a form here because starting the flow
+    doesn't change any server state -- it just navigates.
+  #}
+  <p>
+    <a href="{{ url_for('quadrant', quadrant_key='signal') }}">
+      <button type="button">Start with Signal events &rarr;</button>
+    </a>
+  </p>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{#
+  review.html
+
+  The review screen. Shows all entered events grouped by quadrant,
+  with per-event Edit and Delete actions.
+
+  The route passes in:
+    grouped       -- dict mapping quadrant key -> list of events in that quadrant
+    quadrants     -- the QUADRANTS dict (name, subtitle, etc. for headings)
+    total_count   -- sum of all events across all quadrants
+
+  Why grouped by quadrant (not by day): the user just spent the
+  whole flow thinking in quadrants. Review keeps the same mental
+  model so they can verify their priority decisions before moving
+  on to the timesheet (which groups by day).
+#}
+
+{% block title %}Review Your Week - Priority Planner{% endblock %}
+
+{% block content %}
+  <h2>Review Your Week</h2>
+
+  {% if total_count == 0 %}
+    <p>
+      No events were entered. <a href="{{ url_for('quadrant', quadrant_key='signal') }}">
+      Go back to start</a>.
+    </p>
+  {% else %}
+    <p>You entered <strong>{{ total_count }}</strong> event(s). Review them below.
+       Edit or delete anything that doesn't look right, then continue.</p>
+
+    {#
+      Iterate quadrants in the same order users entered them
+      (Signal first, then Urgent, etc.). The order in the QUADRANTS
+      dict is the order they appear here.
+    #}
+    {% for key, info in quadrants.items() %}
+      <section>
+        <h3>{{ info.name }}</h3>
+        <p><em>{{ info.subtitle }}</em></p>
+
+        {% if grouped[key]|length == 0 %}
+          <p><small>No {{ info.name|lower }} events.</small></p>
+        {% else %}
+          <ul>
+            {% for event in grouped[key] %}
+              <li>
+                {#
+                  Display: title, day, time range. We map day-number
+                  back to a name for readability. Times are shown in
+                  HH:MM (the format the engine uses internally).
+                #}
+                <strong>{{ event.title }}</strong>
+                &mdash;
+                {{ ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][event.day] }},
+                {{ "%02d:%02d"|format(event.start // 100, event.start % 100) }}
+                to
+                {{ "%02d:%02d"|format(event.end // 100, event.end % 100) }}
+
+                {# Edit link -- safe as GET because it just shows a form. #}
+                <a href="{{ url_for('edit_event', event_id=event.id) }}">[Edit]</a>
+
+                {#
+                  Delete -- MUST be a POST form (not a plain link),
+                  with a CSRF token. A GET-based delete link is a
+                  classic CSRF vulnerability.
+
+                  We use an inline form so the [Delete] button looks
+                  like an inline action. The button is type="submit".
+                #}
+                <form method="post"
+                      action="{{ url_for('delete_event', event_id=event.id) }}"
+                      style="display:inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit"
+                          onclick="return confirm('Delete this event?');">
+                    [Delete]
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </section>
+    {% endfor %}
+
+    <hr>
+
+    <p>
+      {#
+        "Looks good, continue" -- leads to the timesheet (Session 5).
+        For now we render a stub page that will be replaced in
+        Session 5 with the actual timesheet display.
+      #}
+      <a href="{{ url_for('show_timesheet') }}">
+        <button type="button">Looks good &mdash; show my timesheet &rarr;</button>
+      </a>
+    </p>
+
+    <p>
+      <a href="{{ url_for('reset') }}">Start over</a>
+    </p>
+  {% endif %}
+{% endblock %}

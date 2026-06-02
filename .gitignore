@@ -1,0 +1,55 @@
+# ============================================================
+# .gitignore
+#
+# Tells Git which files to NEVER commit. This is the first piece
+# of "security as we build" — it keeps secrets, environment files,
+# and machine-generated junk out of version control.
+#
+# If this app ever has API keys, .env files, or user data, this
+# file is what stops you from accidentally publishing them.
+# ============================================================
+
+# --- Python machine-generated junk ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# --- Virtual environments ---
+# These are local to each developer's machine and shouldn't be shared.
+venv/
+env/
+.venv/
+
+# --- Secrets and environment files ---
+# CRITICAL: these often hold API keys, database passwords, etc.
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets.json
+credentials.json
+
+# --- IDE / editor files ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# --- Test / coverage output ---
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- User-generated timesheet outputs ---
+# The CLI wrapper saves timesheets here. They're personal data;
+# never commit them to a public repo.
+outputs/
+
+# --- Flask/web app files we don't want to commit ---
+# Instance folder holds environment-specific config (Flask convention).
+instance/
+# Compiled CSS, if we ever introduce a CSS pipeline.
+static/dist/

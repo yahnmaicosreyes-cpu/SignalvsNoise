@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{#
+  base.html
+
+  The shared HTML shell that every page in the app inherits from.
+  Individual pages override the named block sections to fill in
+  their own content while reusing the same head/header/footer.
+
+  Why this exists:
+    Without a base template, every page would have to repeat the
+    DOCTYPE, html, head, charset, viewport, etc. With it, we change
+    those things in one place and every page updates.
+
+  No styling yet -- per the build plan, styling comes LAST.
+  This is intentionally plain HTML.
+
+  IMPORTANT: Jinja directives are written with curly-brace+percent
+  syntax. We use curly-brace+hash for COMMENTS like this one so
+  that text describing Jinja doesn't get interpreted AS Jinja.
+#}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {# Browser tab title. Each page can override via the title block. #}
+  <title>{% block title %}Priority Planner{% endblock %}</title>
+</head>
+<body>
+  {# Page header. Same on every page so users always know where they are. #}
+  <header>
+    <h1>Priority Planner</h1>
+  </header>
+
+  {# Main content area. Each page fills this in with its own HTML. #}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Footer. Tiny for now. #}
+  <footer>
+    <p><small>Priority Planner</small></p>
+  </footer>
+</body>
+</html>
